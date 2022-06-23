@@ -20,6 +20,8 @@ local menu13 = MenuV:CreateMenu(false, Lang:t("menu.vehicle_categories"), menuLo
 local menu14 = MenuV:CreateMenu(false, Lang:t("menu.vehicle_models"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test13')
 local menu15 = MenuV:CreateMenu(false, Lang:t("menu.entity_view_options"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test15')
 local menu16 = MenuV:CreateMenu(false, Lang:t("menu.spawn_weapons"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test16')
+local jobMenu = MenuV:CreateMenu(false, Lang:t("menu.job"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'job')
+local selectjobmenu = MenuV:CreateMenu(false, "Modifier le travail", menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'jobselect')
 
 RegisterNetEvent('qb-admin:client:openMenu', function()
     MenuV:OpenMenu(menu)
@@ -207,6 +209,106 @@ local menu_button13 = menu5:AddSlider({
         description = Lang:t("menu.time")
     }}
 })
+
+
+
+
+-- Menu des jobs
+
+local jobMenu_button = menu:AddButton({
+    icon = '🔨',
+    label = Lang:t("menu.manage_job"),
+    value = jobMenu,
+    description = "Ouvre le menu de job"
+})
+
+local jobOnDuty_button = jobMenu:AddButton({
+    icon = '🔰',
+    label = "Prendre / Arreter son service",
+    description = "Prendre ou arreter son service"
+})
+
+local jobChange_button = jobMenu:AddButton({
+    icon = '🔩',
+    label = "Modifier le travail",
+    value = selectjobmenu,
+    description = ""
+})
+
+local gradeChange_button = jobMenu:AddSlider({
+    icon = '🏅',
+    label = Lang:t("menu.job_rank"),
+    value = 1,
+    values = {
+        {
+            label = 'Grade 1',
+            value = 1,
+            description = ""
+        },
+        {
+            label = 'Grade 2',
+            value = 2,
+            description = ""
+        },
+        {
+            label = 'Grade 3',
+            value = 3,
+            description = ""
+        },
+        {
+            label = 'Grade 4',
+            value = 4,
+            description = ""
+        },
+        {
+            label = 'Grade 5',
+            value = 5,
+            description = ""
+        },
+        {
+            label = 'Grade 6',
+            value = 6,
+            description = ""
+        },
+        {
+            label = 'Grade 7',
+            value = 7,
+            description = ""
+        }
+    }
+})
+
+gradeChange_button:On("select", function(item, value)
+    TriggerServerEvent("QBCore:SetJobRank", value)
+end)
+
+jobOnDuty_button:On('select', function()
+    TriggerEvent("qb-policejob:ToggleDuty")
+end)
+
+
+jobChange_button:On("select",function()
+    selectjobmenu:ClearItems()
+    local elements = {
+        [1] = {
+            icon = '🗑',
+            label = "Chômeur",
+            value = "unemployed",
+            description = "Les allocations c'est cool"
+        },
+        [2] = {
+            icon = '👮‍♂️',
+            label = "Police",
+            value = "police",
+            description = "Devenez force de l'ordre"
+        }
+    }
+    for k,v in ipairs(elements) do
+        local button = selectjobmenu:AddButton({icon = v.icon,label = v.label,value = v,description = v.description,select = function(btn)
+            TriggerServerEvent("QBCore:SetJob", btn.Value)
+        end})
+    end
+end)
 
 menu_button11:On("select",function()
     menu6:ClearItems()
