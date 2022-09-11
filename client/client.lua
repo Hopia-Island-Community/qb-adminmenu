@@ -1,9 +1,11 @@
 local banlength = nil
+local Props = {}
 local showCoords = false
 local vehicleDevMode = false
 local banreason = 'Unknown'
 local kickreason = 'Unknown'
 local menuLocation = 'topright' -- e.g. topright (default), topleft, bottomright, bottomleft
+Props = exports.S_Props:GetPropsConfig()
 
 local menu = MenuV:CreateMenu(false, Lang:t("menu.admin_menu"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test')
 local menu2 = MenuV:CreateMenu(false, Lang:t("menu.admin_options"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test1')
@@ -20,8 +22,11 @@ local menu13 = MenuV:CreateMenu(false, Lang:t("menu.vehicle_categories"), menuLo
 local menu14 = MenuV:CreateMenu(false, Lang:t("menu.vehicle_models"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test13')
 local menu15 = MenuV:CreateMenu(false, Lang:t("menu.entity_view_options"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test15')
 local menu16 = MenuV:CreateMenu(false, Lang:t("menu.spawn_weapons"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test16')
-local jobMenu = MenuV:CreateMenu(false, Lang:t("menu.job"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'job')
-local selectjobmenu = MenuV:CreateMenu(false, "Modifier le travail", menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'jobselect')
+-- spawn props
+local menu17 = MenuV:CreateMenu(false, "menu props", menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test17')
+local menu18 = MenuV:CreateMenu(false, "category props", menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test18')
+local menu19 = MenuV:CreateMenu(false, "spawn props", menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test19')
+
 
 RegisterNetEvent('qb-admin:client:openMenu', function()
     MenuV:OpenMenu(menu)
@@ -53,6 +58,96 @@ menu:AddButton({
     value = menu12,
     description = Lang:t("desc.vehicles_desc")
 })
+
+-- spawn props
+menu:AddButton({
+    icon = '📦',
+    label = "Menu props",
+    value = menu17,
+    description = "Utile pour spawn des props / supprimer"
+})
+
+local menu17_button1 = menu17:AddButton({
+    icon = '📦',
+    label = "spawn props",
+    value = menu18,
+    description = "spawn des props"
+})
+
+local propscategory = {}
+for k,v in pairs(Props) do
+    local category = v.category
+    if propscategory[category] == nil then
+        propscategory[category] = {}
+    end
+    propscategory[category][k] = v
+end
+
+local function OpenpropsMenu(propscategory)
+    menu19:ClearItems()
+    MenuV:OpenMenu(menu19)
+    for k, v in pairs(propscategory) do
+        menu19:AddButton({
+            label = v.nom,
+            value = k,
+            description = 'Spawn ' .. v.nom,
+            select = function(_)
+                TriggerServerEvent('sprops:server:spawnpropadmin', k)
+            end
+        })
+    end
+end
+
+menu17_button1:On('Select', function(_)
+    menu18:ClearItems()
+    for k, v in pairs(propscategory) do
+        menu18:AddButton({
+            label = k,
+            value = v,
+            description = "Category de props",
+            select = function(btn)
+                local select = btn.Value
+                OpenpropsMenu(select)
+            end
+        })
+    end
+end)
+
+local menu17_button2 = menu17:AddButton({
+    icon = '📦',
+    label = "Supprimer un prop",
+    value = true,
+    description = "Pour supprimer des props"
+})
+
+local menu17_button3 = menu17:AddButton({
+    icon = '📦',
+    label = "Supprimer tous ses props",
+    value = true,
+    description = "Supprime touts les props du serveur"
+})
+
+local menu17_button4 = menu17:AddButton({
+    icon = '⚠️',
+    label = "Supprimer tout les props du serveur",
+    value = true,
+    description = "Supprime touts les props du serveur"
+})
+
+
+menu17_button2:On("Select", function(source)
+    TriggerEvent("sprops:client:deleteprops", source, true)
+end)
+menu17_button3:On("Select", function(source)
+    TriggerEvent("sprops:client:deleteallprops", source, true)
+end)
+menu17_button4:On("Select", function(source)
+    TriggerServerEvent("sprops:server:deleteallpropsadmin", source)
+end)
+
+
+
+
 local menu_button4 = menu:AddButton({
     icon = '💊',
     label = Lang:t("menu.dealer_list"),
@@ -101,7 +196,7 @@ local menu_button11 = menu5:AddButton({
     value = menu6,
     description = Lang:t("desc.weather_desc")
 })
- menu2:AddButton({
+menu2:AddButton({
     icon = '🔫',
     label = Lang:t("menu.spawn_weapons"),
     value = menu16,
@@ -112,203 +207,103 @@ local menu_button13 = menu5:AddSlider({
     label = Lang:t("menu.server_time"),
     value = GetClockHours(),
     values = {{
-        label = '00',
-        value = '00',
-        description = Lang:t("menu.time")
-    }, {
-        label = '01',
-        value = '01',
-        description = Lang:t("menu.time")
-    }, {
-        label = '02',
-        value = '02',
-        description = Lang:t("menu.time")
-    }, {
-        label = '03',
-        value = '03',
-        description = Lang:t("menu.time")
-    }, {
-        label = '04',
-        value = '04',
-        description = Lang:t("menu.time")
-    }, {
-        label = '05',
-        value = '05',
-        description = Lang:t("menu.time")
-    }, {
-        label = '06',
-        value = '06',
-        description = Lang:t("menu.time")
-    }, {
-        label = '07',
-        value = '07',
-        description = Lang:t("menu.time")
-    }, {
-        label = '08',
-        value = '08',
-        description = Lang:t("menu.time")
-    }, {
-        label = '09',
-        value = '09',
-        description = Lang:t("menu.time")
-    }, {
-        label = '10',
-        value = '10',
-        description = Lang:t("menu.time")
-    }, {
-        label = '11',
-        value = '11',
-        description = Lang:t("menu.time")
-    }, {
-        label = '12',
-        value = '12',
-        description = Lang:t("menu.time")
-    }, {
-        label = '13',
-        value = '13',
-        description = Lang:t("menu.time")
-    }, {
-        label = '14',
-        value = '14',
-        description = Lang:t("menu.time")
-    }, {
-        label = '15',
-        value = '15',
-        description = Lang:t("menu.time")
-    }, {
-        label = '16',
-        value = '16',
-        description = Lang:t("menu.time")
-    }, {
-        label = '17',
-        value = '17',
-        description = Lang:t("menu.time")
-    }, {
-        label = '18',
-        value = '18',
-        description = Lang:t("menu.time")
-    }, {
-        label = '19',
-        value = '19',
-        description = Lang:t("menu.time")
-    }, {
-        label = '20',
-        value = '20',
-        description = Lang:t("menu.time")
-    }, {
-        label = '21',
-        value = '21',
-        description = Lang:t("menu.time")
-    }, {
-        label = '22',
-        value = '22',
-        description = Lang:t("menu.time")
-    }, {
-        label = '23',
-        value = '23',
-        description = Lang:t("menu.time")
-    }}
+                  label = '00',
+                  value = '00',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '01',
+                  value = '01',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '02',
+                  value = '02',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '03',
+                  value = '03',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '04',
+                  value = '04',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '05',
+                  value = '05',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '06',
+                  value = '06',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '07',
+                  value = '07',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '08',
+                  value = '08',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '09',
+                  value = '09',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '10',
+                  value = '10',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '11',
+                  value = '11',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '12',
+                  value = '12',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '13',
+                  value = '13',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '14',
+                  value = '14',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '15',
+                  value = '15',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '16',
+                  value = '16',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '17',
+                  value = '17',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '18',
+                  value = '18',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '19',
+                  value = '19',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '20',
+                  value = '20',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '21',
+                  value = '21',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '22',
+                  value = '22',
+                  description = Lang:t("menu.time")
+              }, {
+                  label = '23',
+                  value = '23',
+                  description = Lang:t("menu.time")
+              }}
 })
-
-
-
-
--- Menu des jobs
-
-local jobMenu_button = menu:AddButton({
-    icon = '🔨',
-    label = Lang:t("menu.manage_job"),
-    value = jobMenu,
-    description = "Ouvre le menu de job"
-})
-
-local jobOnDuty_button = jobMenu:AddButton({
-    icon = '🔰',
-    label = "Prendre / Arreter son service",
-    description = "Prendre ou arreter son service"
-})
-
-local jobChange_button = jobMenu:AddButton({
-    icon = '🔩',
-    label = "Modifier le travail",
-    value = selectjobmenu,
-    description = ""
-})
-
-local gradeChange_button = jobMenu:AddSlider({
-    icon = '🏅',
-    label = Lang:t("menu.job_rank"),
-    value = 1,
-    values = {
-        {
-            label = 'Grade 1',
-            value = 1,
-            description = ""
-        },
-        {
-            label = 'Grade 2',
-            value = 2,
-            description = ""
-        },
-        {
-            label = 'Grade 3',
-            value = 3,
-            description = ""
-        },
-        {
-            label = 'Grade 4',
-            value = 4,
-            description = ""
-        },
-        {
-            label = 'Grade 5',
-            value = 5,
-            description = ""
-        },
-        {
-            label = 'Grade 6',
-            value = 6,
-            description = ""
-        },
-        {
-            label = 'Grade 7',
-            value = 7,
-            description = ""
-        }
-    }
-})
-
-gradeChange_button:On("select", function(item, value)
-    TriggerServerEvent("QBCore:SetJobRank", value)
-end)
-
-jobOnDuty_button:On('select', function()
-    TriggerEvent("qb-policejob:ToggleDuty")
-end)
-
-
-jobChange_button:On("select",function()
-    selectjobmenu:ClearItems()
-    local elements = {
-        [1] = {
-            icon = '🗑',
-            label = "Chômeur",
-            value = "unemployed",
-            description = "Les allocations c'est cool"
-        },
-        [2] = {
-            icon = '👮‍♂️',
-            label = "Police",
-            value = "police",
-            description = "Devenez force de l'ordre"
-        }
-    }
-    for k,v in ipairs(elements) do
-        local button = selectjobmenu:AddButton({icon = v.icon,label = v.label,value = v,description = v.description,select = function(btn)
-            TriggerServerEvent("QBCore:SetJob", btn.Value)
-        end})
-    end
-end)
 
 menu_button11:On("select",function()
     menu6:ClearItems()
@@ -482,6 +477,7 @@ local menu12_button1 = menu12:AddButton({
     description = Lang:t("desc.spawn_vehicle_desc")
 })
 
+
 local menu12_button2 = menu12:AddButton({
     icon = '🔧',
     label = Lang:t("menu.fix_vehicle"),
@@ -515,46 +511,46 @@ local entity_view_distance = menu15:AddSlider({
     label = Lang:t("menu.entity_view_distance"),
     value = GetCurrentEntityViewDistance(),
     values = {{
-        label = '5',
-        value = '5',
-        description = Lang:t("menu.entity_view_distance")
-    }, {
-        label = '10',
-        value = '10',
-        description = Lang:t("menu.entity_view_distance")
-    }, {
-        label = '15',
-        value = '15',
-        description = Lang:t("menu.entity_view_distance")
-    }, {
-        label = '20',
-        value = '20',
-        description = Lang:t("menu.entity_view_distance")
-    }, {
-        label = '25',
-        value = '25',
-        description = Lang:t("menu.entity_view_distance")
-    }, {
-        label = '30',
-        value = '30',
-        description = Lang:t("menu.entity_view_distance")
-    }, {
-        label = '35',
-        value = '35',
-        description = Lang:t("menu.entity_view_distance")
-    }, {
-        label = '40',
-        value = '40',
-        description = Lang:t("menu.entity_view_distance")
-    }, {
-        label = '45',
-        value = '45',
-        description = Lang:t("menu.entity_view_distance")
-    }, {
-        label = '50',
-        value = '50',
-        description = Lang:t("menu.entity_view_distance")
-    }}
+                  label = '5',
+                  value = '5',
+                  description = Lang:t("menu.entity_view_distance")
+              }, {
+                  label = '10',
+                  value = '10',
+                  description = Lang:t("menu.entity_view_distance")
+              }, {
+                  label = '15',
+                  value = '15',
+                  description = Lang:t("menu.entity_view_distance")
+              }, {
+                  label = '20',
+                  value = '20',
+                  description = Lang:t("menu.entity_view_distance")
+              }, {
+                  label = '25',
+                  value = '25',
+                  description = Lang:t("menu.entity_view_distance")
+              }, {
+                  label = '30',
+                  value = '30',
+                  description = Lang:t("menu.entity_view_distance")
+              }, {
+                  label = '35',
+                  value = '35',
+                  description = Lang:t("menu.entity_view_distance")
+              }, {
+                  label = '40',
+                  value = '40',
+                  description = Lang:t("menu.entity_view_distance")
+              }, {
+                  label = '45',
+                  value = '45',
+                  description = Lang:t("menu.entity_view_distance")
+              }, {
+                  label = '50',
+                  value = '50',
+                  description = Lang:t("menu.entity_view_distance")
+              }}
 })
 
 local copy_free_aim_entity_info = menu15:AddButton({
@@ -597,9 +593,9 @@ menu_dev_button:On('change', function(_, _, _)
     dev = not dev
     TriggerEvent('qb-admin:client:ToggleDevmode')
     if dev then
-	SetPlayerInvincible(PlayerId(), true)
+        SetPlayerInvincible(PlayerId(), true)
     else
-	SetPlayerInvincible(PlayerId(), false)
+        SetPlayerInvincible(PlayerId(), false)
     end
 end)
 
@@ -799,12 +795,12 @@ local function OpenCarModelsMenu(category)
     MenuV:OpenMenu(menu14)
     for k, v in pairs(category) do
         menu14:AddButton({
-             label = v["name"],
-             value = k,
-             description = 'Spawn ' .. v["name"],
-             select = function(_)
-                 TriggerServerEvent('QBCore:CallCommand', "car", { k })
-             end
+            label = v["name"],
+            value = k,
+            description = 'Spawn ' .. v["name"],
+            select = function(_)
+                TriggerServerEvent('QBCore:CallCommand', "car", { k })
+            end
         })
     end
 end
@@ -850,14 +846,14 @@ end)
 -- Weapons list
 
 for _,v in pairs(QBCore.Shared.Weapons) do
-  menu16:AddButton({icon = '🔫',
-                    label = v.label ,
-                    value = v.value ,
-                    description = Lang:t("desc.spawn_weapons_desc"),
-                    select = function(_)
-        TriggerServerEvent('qb-admin:giveWeapon', v.name)
-        QBCore.Functions.Notify(Lang:t("success.spawn_weapon"))
-    end})
+    menu16:AddButton({icon = '🔫',
+                      label = v.label ,
+                      value = v.value ,
+                      description = Lang:t("desc.spawn_weapons_desc"),
+                      select = function(_)
+                          TriggerServerEvent('qb-admin:giveWeapon', v.name)
+                          QBCore.Functions.Notify(Lang:t("success.spawn_weapon"))
+                      end})
 end
 -- Dealer List
 
@@ -929,18 +925,18 @@ local function OpenPermsMenu(permsply)
                 label = 'Group',
                 value = 'user',
                 values = {{
-                    label = 'User',
-                    value = 'user',
-                    description = 'Group'
-                }, {
-                    label = 'Admin',
-                    value = 'admin',
-                    description = 'Group'
-                }, {
-                    label = 'God',
-                    value = 'god',
-                    description = 'Group'
-                }},
+                              label = 'User',
+                              value = 'user',
+                              description = 'Group'
+                          }, {
+                              label = 'Admin',
+                              value = 'admin',
+                              description = 'Group'
+                          }, {
+                              label = 'God',
+                              value = 'god',
+                              description = 'Group'
+                          }},
                 change = function(_, newValue, _)
                     local vcal = newValue
                     if vcal == 1 then
@@ -964,7 +960,7 @@ local function OpenPermsMenu(permsply)
                 select = function(_)
                     if selectedgroup ~= 'Unknown' then
                         TriggerServerEvent('qb-admin:server:setPermissions', permsply.id, selectedgroup)
-			            QBCore.Functions.Notify(Lang:t("success.changed_perm"), 'success')
+                        QBCore.Functions.Notify(Lang:t("success.changed_perm"), 'success')
                         selectedgroup = 'Unknown'
                     else
                         QBCore.Functions.Notify(Lang:t("error.changed_perm_failed"), 'error')
@@ -979,28 +975,28 @@ end
 
 local function LocalInput(text, number, windows)
     AddTextEntry("FMMC_MPM_NA", text)
-  DisplayOnscreenKeyboard(1, "FMMC_MPM_NA", "", windows or "", "", "", "", number or 30)
-  while (UpdateOnscreenKeyboard() == 0) do
-    DisableAllControlActions(0)
-    Wait(0)
-  end
+    DisplayOnscreenKeyboard(1, "FMMC_MPM_NA", "", windows or "", "", "", "", number or 30)
+    while (UpdateOnscreenKeyboard() == 0) do
+        DisableAllControlActions(0)
+        Wait(0)
+    end
 
-  if (GetOnscreenKeyboardResult()) then
-    local result = GetOnscreenKeyboardResult()
-      return result
-  end
+    if (GetOnscreenKeyboardResult()) then
+        local result = GetOnscreenKeyboardResult()
+        return result
+    end
 end
 
 local function LocalInputInt(text, number, windows)
     AddTextEntry("FMMC_MPM_NA", text)
     DisplayOnscreenKeyboard(1, "FMMC_MPM_NA", "", windows or "", "", "", "", number or 30)
     while (UpdateOnscreenKeyboard() == 0) do
-      DisableAllControlActions(0)
-      Wait(0)
+        DisableAllControlActions(0)
+        Wait(0)
     end
     if (GetOnscreenKeyboardResult()) then
-      local result = GetOnscreenKeyboardResult()
-      return tonumber(result)
+        local result = GetOnscreenKeyboardResult()
+        return tonumber(result)
     end
 end
 
@@ -1051,54 +1047,54 @@ local function OpenBanMenu(banplayer)
         label = Lang:t("info.length"),
         value = '3600',
         values = {{
-            label = Lang:t("time.1hour"),
-            value = '3600',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.6hour"),
-            value ='21600',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.12hour"),
-            value = '43200',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.1day"),
-            value = '86400',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.3day"),
-            value = '259200',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.1week"),
-            value = '604800',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.1month"),
-            value = '2678400',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.3month"),
-            value = '8035200',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.6month"),
-            value = '16070400',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.1year"),
-            value = '32140800',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.permenent"),
-            value = '99999999999',
-            description = Lang:t("time.ban_length")
-        }, {
-            label = Lang:t("time.self"),
-            value = "self",
-            description = Lang:t("time.ban_length")
-        }},
+                      label = Lang:t("time.1hour"),
+                      value = '3600',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.6hour"),
+                      value ='21600',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.12hour"),
+                      value = '43200',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.1day"),
+                      value = '86400',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.3day"),
+                      value = '259200',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.1week"),
+                      value = '604800',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.1month"),
+                      value = '2678400',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.3month"),
+                      value = '8035200',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.6month"),
+                      value = '16070400',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.1year"),
+                      value = '32140800',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.permenent"),
+                      value = '99999999999',
+                      description = Lang:t("time.ban_length")
+                  }, {
+                      label = Lang:t("time.self"),
+                      value = "self",
+                      description = Lang:t("time.ban_length")
+                  }},
         select = function(_, newValue, _)
             if newValue == "self" then
                 banlength = LocalInputInt('Ban Length', 11)
