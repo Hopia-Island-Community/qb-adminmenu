@@ -5,7 +5,7 @@ local vehicleDevMode = false
 local banreason = 'Unknown'
 local kickreason = 'Unknown'
 local menuLocation = 'topright' -- e.g. topright (default), topleft, bottomright, bottomleft
-Props = exports.S_Props:GetPropsConfig()
+Props = exports['qb-sprops']:GetPropsConfig()
 
 
 local menu = MenuV:CreateMenu(false, Lang:t("menu.admin_menu"), menuLocation, 220, 20, 60, 'size-125', 'none', 'menuv', 'test')
