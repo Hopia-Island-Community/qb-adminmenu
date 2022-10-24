@@ -315,7 +315,7 @@ local menu_button13 = menu5:AddSlider({
 
 local jobMenu_button = menu:AddButton({
     icon = '🔨',
-    label = Lang:t("menu.manage_job"),
+    label = "Gestion métier",
     value = jobMenu,
     description = "Ouvre le menu de job"
 })
@@ -335,7 +335,7 @@ local jobChange_button = jobMenu:AddButton({
 
 local gradeChange_button = jobMenu:AddSlider({
     icon = '🏅',
-    label = Lang:t("menu.job_rank"),
+    label = "Rang du métier",
     value = 1,
     values = {
         {
