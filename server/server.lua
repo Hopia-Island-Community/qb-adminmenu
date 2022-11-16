@@ -3,10 +3,10 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local frozen = false
 local permissions = {
     ['kill'] = 'god',
-    ['ban'] = 'admin',
-    ['noclip'] = 'admin',
+    ['ban'] = 'god',
+    ['noclip'] = 'mod',
     ['kickall'] = 'admin',
-    ['kick'] = 'admin',
+    ['kick'] = 'mod'
 }
 local players = {}
 
